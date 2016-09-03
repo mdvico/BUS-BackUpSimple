@@ -58,25 +58,25 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def BackUp(self):
         """Copia los archivos/directorio elegido como origen en el directorio elegido como destino."""
-        copiados = 0
-        total = 0
-        archivosOrigen = os.listdir(self.ui.lineOrigen.text())
+        # copiados = 0
+        # total = 0
+        # archivosOrigen = os.listdir(self.ui.lineOrigen.text())
         # total = len(archivosOrigen)
         # for archivo in archivosOrigen:
         #     rutaCompletaArchivo = os.path.join(self.ui.lineOrigen.text(), archivo)
         #     if (os.path.isfile(rutaCompletaArchivo)):
         #         shutil.copy2(rutaCompletaArchivo, self.ui.lineDestino.text())
         #         copiados += 1
+        # if total == copiados:
+        #     estado = 'Se copiaron con éxito ' + str(copiados) + ' archivos'
+        # else:
+        #     estado = 'De un total de ' + str(total) + ' archivos, solo se copiaron ' + str(copiados)
+        # self.statusBar().showMessage(estado)
         shutil.copytree(self.ui.lineOrigen.text(), self.ui.lineDestino.text())
-        if total == copiados:
-            estado = 'Se copiaron con éxito ' + str(copiados) + ' archivos'
-        else:
-            estado = 'De un total de ' + str(total) + ' archivos, solo se copiaron ' + str(copiados)
-        self.statusBar().showMessage(estado)
     
     def ThreadBackground(self):
         schedule.run_pending()
-        time.sleep(1)
+        # time.sleep(1)
 
     def Calendario(self):
         horario = str(self.ui.timeDiario.time().hour()) + ':' + str(self.ui.timeDiario.time().minute())

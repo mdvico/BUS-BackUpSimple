@@ -1,13 +1,14 @@
 # #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-"""BackUp automático con calendario."""
+"""BackUpSimple, BackUp automático con calendario."""
 
 from os.path import expanduser
 import os
 import schedule
 import shutil
 import sys
+import threading
 import time
 
 from PyQt5.QtCore import *
@@ -15,11 +16,6 @@ from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
 from backup import Ui_MainWindow
-
-# import datetime
-# from datetime import datetime as dt
-# from datetime import timedelta
-# import re
 
 class MainWindow(QMainWindow, Ui_MainWindow):
     """Clase para la ventana principal de la aplicacion."""
@@ -31,6 +27,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
+
+        self.threadBackground = threadBackground()
         
         self.ui.pushCopiar.clicked.connect(self.BackUp)
         self.ui.pushProgramar.clicked.connect(self.Calendario)
@@ -39,20 +37,21 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.ui.toolDestino.clicked.connect(self.AbrirDestino)
         self.ui.toolOrigen.clicked.connect(self.AbrirOrigen)
 
-        
+        self.ui.lineOrigen.setText(str(os.getcwd()))
+        self.ui.lineDestino.setText(str(os.getcwd()))
         self.statusBar().showMessage("Listo")
         
     def AbrirDestino(self):
         """Abre el menu de dialogo para seleccionar la carpeta de destino."""
         dirDestino = QFileDialog.getExistingDirectory(self, 'Directorio destino',
-                                                      expanduser("~"), QFileDialog.ShowDirsOnly)
+                                                      expanduser(os.getcwd()), QFileDialog.ShowDirsOnly)
         if os.path.isdir(dirDestino):
             self.ui.lineDestino.setText(dirDestino)
     
     def AbrirOrigen(self):
         """Abre el menu de dialogo para seleccionar la carpeta de origen."""
         dirOrigen = QFileDialog.getExistingDirectory(self, 'Directorio origen',
-                                                     expanduser("~"), QFileDialog.ShowDirsOnly)
+                                                     expanduser(os.getcwd()), QFileDialog.ShowDirsOnly)
         if os.path.isdir(dirOrigen):
             self.ui.lineOrigen.setText(dirOrigen)
 
@@ -73,18 +72,31 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         #     estado = 'De un total de ' + str(total) + ' archivos, solo se copiaron ' + str(copiados)
         # self.statusBar().showMessage(estado)
         shutil.copytree(self.ui.lineOrigen.text(), self.ui.lineDestino.text())
-    
-    def ThreadBackground(self):
-        schedule.run_pending()
-        # time.sleep(1)
 
     def Calendario(self):
         horario = str(self.ui.timeDiario.time().hour()) + ':' + str(self.ui.timeDiario.time().minute())
+        # print(horario)
         schedule.every().day.at(horario).do(self.BackUp)
-        schedule.run_pending()
+        # print("BackUp programado")
+        self.threadBackground.start()
+        self.statusBar().showMessage("BackUp diario programado")
 
     def programarTiempo(self):
         pass
+
+class threadBackground(QThread):
+    def __init__(self):
+        QThread.__init__(self)
+
+    def __del__(self):
+        self.wait()
+
+    def run(self):
+        while(True):
+            # print("Esperando...")
+            schedule.run_pending()
+            # print("Esperandoooo")
+            self.sleep(1)
 
 
 def run():

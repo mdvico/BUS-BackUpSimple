@@ -11,7 +11,10 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(291, 357)
+        MainWindow.resize(291, 379)
+        icon = QtGui.QIcon()
+        icon.addPixmap(QtGui.QPixmap("Imágenes/Logo4.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        MainWindow.setWindowIcon(icon)
         MainWindow.setStatusTip("")
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
@@ -81,12 +84,27 @@ class Ui_MainWindow(object):
         self.gridLayout.addWidget(self.groupBox, 0, 0, 1, 1)
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 291, 28))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 291, 30))
         self.menubar.setObjectName("menubar")
+        self.menuArchivo = QtWidgets.QMenu(self.menubar)
+        self.menuArchivo.setObjectName("menuArchivo")
+        self.menuAyuda = QtWidgets.QMenu(self.menubar)
+        self.menuAyuda.setObjectName("menuAyuda")
         MainWindow.setMenuBar(self.menubar)
         self.statusbar = QtWidgets.QStatusBar(MainWindow)
         self.statusbar.setObjectName("statusbar")
         MainWindow.setStatusBar(self.statusbar)
+        self.actionSalir = QtWidgets.QAction(MainWindow)
+        self.actionSalir.setObjectName("actionSalir")
+        self.action = QtWidgets.QAction(MainWindow)
+        self.action.setObjectName("action")
+        self.actionAcerca_de = QtWidgets.QAction(MainWindow)
+        self.actionAcerca_de.setObjectName("actionAcerca_de")
+        self.menuArchivo.addAction(self.actionSalir)
+        self.menuAyuda.addAction(self.action)
+        self.menuAyuda.addAction(self.actionAcerca_de)
+        self.menubar.addAction(self.menuArchivo.menuAction())
+        self.menubar.addAction(self.menuAyuda.menuAction())
 
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
@@ -102,7 +120,7 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "BackUp La Bomba"))
+        MainWindow.setWindowTitle(_translate("MainWindow", "BackUpSimple"))
         self.groupBox_2.setTitle(_translate("MainWindow", "Diagrama de copiado"))
         self.radioCada.setText(_translate("MainWindow", "Todo el tiempo cada:"))
         self.radioDiario.setText(_translate("MainWindow", "Todos los días a las:"))
@@ -113,6 +131,13 @@ class Ui_MainWindow(object):
         self.labelOrigen.setText(_translate("MainWindow", "Origen:"))
         self.toolDestino.setText(_translate("MainWindow", "..."))
         self.toolOrigen.setText(_translate("MainWindow", "..."))
+        self.menuArchivo.setTitle(_translate("MainWindow", "&Archivo"))
+        self.menuAyuda.setTitle(_translate("MainWindow", "A&yuda"))
+        self.actionSalir.setText(_translate("MainWindow", "&Salir"))
+        self.actionSalir.setShortcut(_translate("MainWindow", "Ctrl+Q"))
+        self.action.setText(_translate("MainWindow", "Como usar"))
+        self.action.setShortcut(_translate("MainWindow", "F1"))
+        self.actionAcerca_de.setText(_translate("MainWindow", "Acerca de"))
 
 
 if __name__ == "__main__":

@@ -1,1 +1,8 @@
 .idea
+build
+dist
+__pycache__
+*chache*
+*.spec
+*.swp
+*.txt

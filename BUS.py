@@ -8,14 +8,24 @@ import os
 import schedule
 import shutil
 import sys
-import threading
-import time
+from datetime import date
 
 from PyQt5.QtCore import *
-from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
-from backup import Ui_MainWindow
+GUI = os.getcwd() + '/GUI'
+
+from GUI.backup import Ui_MainWindow
+
+
+global dirOrigen
+global dirDestino
+global fecha
+
+fecha = date.today()
+dirOrigen = expanduser(os.getcwd())
+dirDestino = expanduser(os.getcwd()) + '/' + fecha.strftime("%d-%m-%y")
+
 
 class MainWindow(QMainWindow, Ui_MainWindow):
     """Clase para la ventana principal de la aplicacion."""
@@ -28,7 +38,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
 
-        self.threadBackground = threadBackground()
+        self.ThreadBackground = ThreadBackground()
         
         self.ui.pushCopiar.clicked.connect(self.BackUp)
         self.ui.pushProgramar.clicked.connect(self.Calendario)
@@ -37,15 +47,17 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.ui.toolDestino.clicked.connect(self.AbrirDestino)
         self.ui.toolOrigen.clicked.connect(self.AbrirOrigen)
 
-        self.ui.lineOrigen.setText(str(os.getcwd()))
-        self.ui.lineDestino.setText(str(os.getcwd()))
+        self.ui.lineOrigen.setText(dirOrigen)
+        self.ui.lineDestino.setText(dirDestino)
         self.statusBar().showMessage("Listo")
+        self.Calendario()
         
     def AbrirDestino(self):
         """Abre el menu de dialogo para seleccionar la carpeta de destino."""
         dirDestino = QFileDialog.getExistingDirectory(self, 'Directorio destino',
                                                       expanduser(os.getcwd()), QFileDialog.ShowDirsOnly)
         if os.path.isdir(dirDestino):
+            dirDestino = dirDestino + '/' + fecha.strftime("%d-%m-%y")
             self.ui.lineDestino.setText(dirDestino)
     
     def AbrirOrigen(self):
@@ -57,34 +69,28 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def BackUp(self):
         """Copia los archivos/directorio elegido como origen en el directorio elegido como destino."""
-        # copiados = 0
-        # total = 0
-        # archivosOrigen = os.listdir(self.ui.lineOrigen.text())
-        # total = len(archivosOrigen)
-        # for archivo in archivosOrigen:
-        #     rutaCompletaArchivo = os.path.join(self.ui.lineOrigen.text(), archivo)
-        #     if (os.path.isfile(rutaCompletaArchivo)):
-        #         shutil.copy2(rutaCompletaArchivo, self.ui.lineDestino.text())
-        #         copiados += 1
-        # if total == copiados:
-        #     estado = 'Se copiaron con éxito ' + str(copiados) + ' archivos'
-        # else:
-        #     estado = 'De un total de ' + str(total) + ' archivos, solo se copiaron ' + str(copiados)
-        # self.statusBar().showMessage(estado)
-        shutil.copytree(self.ui.lineOrigen.text(), self.ui.lineDestino.text())
+        try:
+            self.statusBar().showMessage("Copiando...")
+            shutil.copytree(self.ui.lineOrigen.text(), self.ui.lineDestino.text())
+            self.statusBar().showMessage("Se copiaron con éxito todos los archivos")
+        except Exception as e:
+            self.statusBar().showMessage("Error intentando copiar. " + str(e))
+            with open('error.txt', 'a') as registro:
+                registro.write(str(e))
 
     def Calendario(self):
+        """Genera el evento de BackUp diario, inicia el thread de control continuo."""
         horario = str(self.ui.timeDiario.time().hour()) + ':' + str(self.ui.timeDiario.time().minute())
-        # print(horario)
         schedule.every().day.at(horario).do(self.BackUp)
-        # print("BackUp programado")
-        self.threadBackground.start()
+        self.ThreadBackground.start()
         self.statusBar().showMessage("BackUp diario programado")
 
     def programarTiempo(self):
         pass
 
-class threadBackground(QThread):
+
+class ThreadBackground(QThread):
+    """Thread de ejecución continua para la realización de tareas de BackUp pendientes."""
     def __init__(self):
         QThread.__init__(self)
 
@@ -93,9 +99,7 @@ class threadBackground(QThread):
 
     def run(self):
         while(True):
-            # print("Esperando...")
             schedule.run_pending()
-            # print("Esperandoooo")
             self.sleep(1)
 
 
@@ -110,4 +114,5 @@ try:
     run()
 
 except Exception as e:
-    print("Error: " + str(e))
+    with open('error.txt', 'a') as registro:
+        registro.write(str(e))
